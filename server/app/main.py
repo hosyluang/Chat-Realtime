@@ -1,12 +1,28 @@
 # server/app/main.py
 from fastapi import FastAPI
 from app.core.database import engine, Base
-from app.models import user  # Import để Base nhận biết được model User
-
-# Lệnh này sẽ tạo tất cả các bảng trong DB (nếu chưa có)
-Base.metadata.create_all(bind=engine)
+from app.api import auth
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# tao bang (chi chay lan dau neu chua co bang)
+Base.metadata.create_all(bind=engine)
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Cho phép React truy cập
+    allow_credentials=True,
+    allow_methods=["*"],  # Cho phép mọi method (GET, POST...)
+    allow_headers=["*"],
+)
+
+# Dang ky cac router
+app.include_router(auth.router)
 
 
 @app.get("/")
