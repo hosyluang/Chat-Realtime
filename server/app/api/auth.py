@@ -54,6 +54,6 @@ def login_for_access_token(form_data: LoginRequest, db: Session = Depends(get_db
         )
     access_token_expire = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expire
+        data={"sub": str(user.id)}, expires_delta=access_token_expire
     )
     return {"access_token": access_token, "token_type": "bearer"}
