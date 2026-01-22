@@ -1,7 +1,7 @@
 # server/app/main.py
 from fastapi import FastAPI
 from app.core.database import engine, Base
-from app.api import auth
+from app.api import auth, user
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -23,6 +23,7 @@ app.add_middleware(
 
 # Dang ky cac router
 app.include_router(auth.router)
+app.include_router(user.router)
 
 
 @app.get("/")

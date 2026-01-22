@@ -13,13 +13,20 @@ function App() {
         setError('');
 
         try {
-            // Gọi API Backend
-            const response = await api.post('/auth/signin', {
-                username: username,
-                password: password,
-            });
+            // --- SỬA ĐOẠN NÀY ---
+            // Tạo Form Data chuẩn x-www-form-urlencoded
+            const formData = new URLSearchParams();
+            formData.append('username', username);
+            formData.append('password', password);
 
-            // Nếu thành công
+            // Gửi đi (Không gửi object JSON {} nữa mà gửi formData)
+            const response = await api.post('/auth/signin', formData, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            });
+            // --------------------
+
             setToken(response.data.access_token);
             alert('Đăng nhập thành công!');
         } catch (err: any) {

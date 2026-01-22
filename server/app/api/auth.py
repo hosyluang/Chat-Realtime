@@ -1,9 +1,10 @@
-from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from app.schemas.user import UserCreate, UserResponse
+from app.schemas.token import Token
 from sqlalchemy.orm import Session
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
-from app.schemas.token import Token, LoginRequest
+from datetime import timedelta
 from app.core.database import get_db
 from app.core.security import get_password_hash, create_access_token, verify_password
 
@@ -43,7 +44,9 @@ def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/signin", response_model=Token)
-def login_for_access_token(form_data: LoginRequest, db: Session = Depends(get_db)):
+def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+):
     # tim user
     user = db.query(User).filter(User.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
@@ -52,8 +55,10 @@ def login_for_access_token(form_data: LoginRequest, db: Session = Depends(get_db
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    # tao token
     access_token_expire = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": str(user.id)}, expires_delta=access_token_expire
+        data={"sub": user.username}, expires_delta=access_token_expire
     )
+    # tra token
     return {"access_token": access_token, "token_type": "bearer"}
