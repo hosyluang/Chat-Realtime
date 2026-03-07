@@ -1,8 +1,8 @@
 # server/app/main.py
+import app.models
 from fastapi import FastAPI
 from app.core.database import engine, Base
-from app.models import user, friendship
-from app.api import auth, user, friend
+from app.api import auth, friend, user
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

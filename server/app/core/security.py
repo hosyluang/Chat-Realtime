@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
@@ -8,10 +10,14 @@ from typing import Optional
 from app.core.database import get_db
 from app.models.user import User
 
+load_dotenv()
+
 # Cau hinh secret key
-SECRET_KEY = "my-chat-app"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "mac-dinh-neu-khong-thay-trong-env"
+)  # Tham số thứ 2 là giá trị fallback
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],

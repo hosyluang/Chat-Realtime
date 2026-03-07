@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy import or_, and_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
@@ -58,6 +58,7 @@ def send_friend_request(
     return new_friendship
 
 
+# Chap nhan ket ban
 @router.post("/accept/{friendship_id}")
 def accept_friend_request(
     friendship_id: int,
@@ -81,6 +82,7 @@ def accept_friend_request(
     return {"msg": "Friend request accepted"}
 
 
+# Lay danh sach ban be
 @router.get("/", response_model=List[FriendshipResponse])
 def get_friend(
     db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
@@ -88,16 +90,16 @@ def get_friend(
     # Lay tat ca quan he ma minh la nguoi sender va receiver, status la accept
     friends = (
         db.query(Friendship)
-        .join(
-            User,
-            or_(User.id == Friendship.sender_id, User.id == Friendship.receiver_id),
-        )
         .filter(
-            Friendship.status == "ACCEPTED",
             or_(
                 Friendship.sender_id == current_user.id,
                 Friendship.receiver_id == current_user.id,
             ),
+            Friendship.status == "ACCEPTED",
+        )
+        .options(
+            joinedload(Friendship.sender),
+            joinedload(Friendship.receiver),
         )
         .all()
     )
